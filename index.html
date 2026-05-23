@@ -708,6 +708,27 @@ function submitForm() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+async function sendToFormspree(perfil, score) {
+  try {
+    const formData = new FormData();
+    formData.append('nome', user.name);
+    formData.append('empresa', user.company);
+    formData.append('email', user.email);
+    formData.append('setor', user.sector);
+    formData.append('dimensao', user.size);
+    formData.append('perfil', perfil);
+    formData.append('score', score);
+
+    await fetch('https://formspree.io/f/maqkbjee', {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    });
+  } catch(e) {
+    console.error('Formspree error:', e);
+  }
+}
+
 function renderQ() {
   const q = questions[curQ];
   document.getElementById('progCat').textContent = q.cat;
@@ -760,6 +781,8 @@ function showResult() {
 
   const pct = total / (questions.length * 2);
   const pk = pct < 0.35 ? 'critico' : pct < 0.70 ? 'medio' : 'bom';
+  const perfilNome = pk === 'critico' ? 'Situação Crítica' : pk === 'medio' ? 'Potencial Desperdiçado' : 'Boa Base Digital';
+  sendToFormspree(perfilNome, total);
   const p = profiles[pk];
 
   document.getElementById('rFor').textContent = user.name ? `${user.name} · ${user.company}` : user.company || '';
